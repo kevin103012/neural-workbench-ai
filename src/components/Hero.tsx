@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Database, Brain, LineChart, Cpu } from "lucide-react";
 
@@ -34,10 +35,12 @@ const Hero = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-          <Button variant="hero" size="lg" className="text-lg group">
-            Comenzar ahora
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <Link to="/analysis">
+            <Button variant="hero" size="lg" className="text-lg group">
+              Comenzar ahora
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
           <Button variant="outline" size="lg" className="text-lg">
             Ver demostración
           </Button>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -8,12 +9,12 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
             <span className="text-xl font-bold text-primary-foreground">D</span>
           </div>
           <span className="text-xl font-bold">DataLab Pro</span>
-        </div>
+        </Link>
         
         {/* Desktop menu */}
         <div className="hidden md:flex items-center gap-8">
@@ -29,9 +30,11 @@ const Navbar = () => {
           <Button variant="outline" size="sm">
             Iniciar sesión
           </Button>
-          <Button variant="hero" size="sm">
-            Comenzar
-          </Button>
+          <Link to="/analysis">
+            <Button variant="hero" size="sm">
+              Comenzar
+            </Button>
+          </Link>
         </div>
         
         {/* Mobile menu button */}
@@ -59,9 +62,11 @@ const Navbar = () => {
             <Button variant="outline" size="sm">
               Iniciar sesión
             </Button>
-            <Button variant="hero" size="sm">
-              Comenzar
-            </Button>
+            <Link to="/analysis" className="w-full">
+              <Button variant="hero" size="sm" className="w-full">
+                Comenzar
+              </Button>
+            </Link>
           </div>
         </div>
       )}
