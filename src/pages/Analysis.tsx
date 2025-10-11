@@ -2,7 +2,7 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import FileUpload from "@/components/analysis/FileUpload";
 import DataPreview from "@/components/analysis/DataPreview";
-import StatisticsPanel from "@/components/analysis/StatisticsPanel";
+import DataCleaningPanel from "@/components/analysis/DataCleaningPanel";
 import VisualizationPanel from "@/components/analysis/VisualizationPanel";
 import ModelingPanel from "@/components/analysis/ModelingPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,15 +38,15 @@ const Analysis = () => {
             <div className="space-y-6">
               <DataPreview dataset={dataset} onClear={() => setDataset(null)} />
               
-              <Tabs defaultValue="statistics" className="w-full">
+              <Tabs defaultValue="cleaning" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="statistics">Estadísticas</TabsTrigger>
+                  <TabsTrigger value="cleaning">Limpieza</TabsTrigger>
                   <TabsTrigger value="visualization">Visualizaciones</TabsTrigger>
                   <TabsTrigger value="modeling">Modelado</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="statistics" className="mt-6">
-                  <StatisticsPanel dataset={dataset} />
+                <TabsContent value="cleaning" className="mt-6">
+                  <DataCleaningPanel dataset={dataset} />
                 </TabsContent>
                 
                 <TabsContent value="visualization" className="mt-6">

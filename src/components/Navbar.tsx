@@ -27,9 +27,6 @@ const Navbar = () => {
           <a href="#docs" className="text-muted-foreground hover:text-foreground transition-colors">
             Documentación
           </a>
-          <Button variant="outline" size="sm">
-            Iniciar sesión
-          </Button>
           <Link to="/analysis">
             <Button variant="hero" size="sm">
               Comenzar
@@ -59,9 +56,6 @@ const Navbar = () => {
             <a href="#docs" className="text-muted-foreground hover:text-foreground transition-colors py-2">
               Documentación
             </a>
-            <Button variant="outline" size="sm">
-              Iniciar sesión
-            </Button>
             <Link to="/analysis" className="w-full">
               <Button variant="hero" size="sm" className="w-full">
                 Comenzar
