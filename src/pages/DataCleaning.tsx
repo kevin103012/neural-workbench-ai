@@ -1,11 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import DataPreview from "@/components/analysis/DataPreview";
 import DataCleaningPanel from "@/components/analysis/DataCleaningPanel";
 import { DatasetInfo } from "@/pages/Analysis";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 
 const DataCleaning = () => {
   const location = useLocation();
@@ -31,18 +30,25 @@ const DataCleaning = () => {
       <Navbar />
       <div className="pt-20 px-4 pb-12">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Limpieza de Datos
-            </h1>
-            <p className="text-muted-foreground">
-              Prepara y limpia tu dataset antes del análisis y modelado
-            </p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                Limpieza de Datos
+              </h1>
+              <p className="text-muted-foreground">
+                Dataset: <span className="font-semibold">{dataset.name}</span> • {dataset.rows} filas • {dataset.columns.length} columnas
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/analysis")}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Volver a cargar otro
+            </Button>
           </div>
 
           <div className="space-y-6">
-            <DataPreview dataset={dataset} onClear={() => navigate("/analysis")} />
-            
             <DataCleaningPanel dataset={dataset} />
 
             <div className="flex justify-end">
