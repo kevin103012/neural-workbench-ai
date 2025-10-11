@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import FileUpload from "@/components/analysis/FileUpload";
 import DataPreview from "@/components/analysis/DataPreview";
-import DataCleaningPanel from "@/components/analysis/DataCleaningPanel";
 import VisualizationPanel from "@/components/analysis/VisualizationPanel";
 import ModelingPanel from "@/components/analysis/ModelingPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +16,19 @@ export interface DatasetInfo {
 }
 
 const Analysis = () => {
-  const [dataset, setDataset] = useState<DatasetInfo | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [dataset, setDataset] = useState<DatasetInfo | null>(location.state?.dataset || null);
+
+  useEffect(() => {
+    if (location.state?.dataset) {
+      setDataset(location.state.dataset);
+    }
+  }, [location.state]);
+
+  const handleDatasetLoaded = (newDataset: DatasetInfo) => {
+    navigate("/cleaning", { state: { dataset: newDataset } });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,21 +45,16 @@ const Analysis = () => {
           </div>
 
           {!dataset ? (
-            <FileUpload onDatasetLoaded={setDataset} />
+            <FileUpload onDatasetLoaded={handleDatasetLoaded} />
           ) : (
             <div className="space-y-6">
               <DataPreview dataset={dataset} onClear={() => setDataset(null)} />
               
-              <Tabs defaultValue="cleaning" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="cleaning">Limpieza</TabsTrigger>
+              <Tabs defaultValue="visualization" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="visualization">Visualizaciones</TabsTrigger>
                   <TabsTrigger value="modeling">Modelado</TabsTrigger>
                 </TabsList>
-                
-                <TabsContent value="cleaning" className="mt-6">
-                  <DataCleaningPanel dataset={dataset} />
-                </TabsContent>
                 
                 <TabsContent value="visualization" className="mt-6">
                   <VisualizationPanel dataset={dataset} />
