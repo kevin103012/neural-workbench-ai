@@ -3,9 +3,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DatasetInfo } from "@/pages/Analysis";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Play, CheckCircle, TrendingUp } from "lucide-react";
+import { Brain, Play, CheckCircle, TrendingUp, Save, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 interface ModelingPanelProps {
   dataset: DatasetInfo;
@@ -16,6 +17,7 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
   const [targetColumn, setTargetColumn] = useState<string>(dataset.columns[0]);
   const [isTraining, setIsTraining] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const { toast } = useToast();
 
   const models = [
     { value: "linear_regression", label: "Regresión Lineal", type: "Scikit-Learn" },
@@ -30,9 +32,12 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
 
     setTimeout(() => {
       const simulatedResults = {
+        id: Date.now().toString(),
+        name: `${models.find(m => m.value === modelType)?.label} - ${new Date().toLocaleDateString()}`,
+        type: models.find(m => m.value === modelType)?.label || "Unknown",
         model: models.find(m => m.value === modelType)?.label,
         framework: models.find(m => m.value === modelType)?.type,
-        accuracy: (85 + Math.random() * 12).toFixed(2),
+        accuracy: parseFloat((85 + Math.random() * 12).toFixed(2)),
         precision: (82 + Math.random() * 15).toFixed(2),
         recall: (80 + Math.random() * 17).toFixed(2),
         f1Score: (83 + Math.random() * 14).toFixed(2),
@@ -40,11 +45,43 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
         epochs: modelType === "neural_network" ? Math.floor(50 + Math.random() * 50) : null,
         features: dataset.columns.length - 1,
         samples: dataset.rows,
+        createdAt: new Date().toISOString(),
       };
 
       setResults(simulatedResults);
       setIsTraining(false);
     }, 3000);
+  };
+
+  const handleSaveModel = () => {
+    if (!results) return;
+
+    const savedModels = JSON.parse(localStorage.getItem("savedModels") || "[]");
+    savedModels.push(results);
+    localStorage.setItem("savedModels", JSON.stringify(savedModels));
+
+    toast({
+      title: "Modelo guardado",
+      description: "El modelo ha sido guardado en tu dashboard",
+    });
+  };
+
+  const handleDownloadModel = () => {
+    if (!results) return;
+
+    const dataStr = JSON.stringify(results, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${results.name.replace(/\s+/g, "_")}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Modelo descargado",
+      description: "El modelo ha sido descargado correctamente",
+    });
   };
 
   return (
@@ -174,7 +211,17 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-border">
+          <div className="pt-6 border-t border-border space-y-4">
+            <div className="flex gap-3">
+              <Button onClick={handleSaveModel} className="flex-1">
+                <Save className="mr-2 h-4 w-4" />
+                Guardar Modelo
+              </Button>
+              <Button onClick={handleDownloadModel} variant="outline" className="flex-1">
+                <Download className="mr-2 h-4 w-4" />
+                Descargar Modelo
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground">
               <strong>Nota:</strong> Estos son resultados simulados. Conecta con el backend de FastAPI para entrenar modelos reales con Scikit-Learn y PyTorch.
             </p>
