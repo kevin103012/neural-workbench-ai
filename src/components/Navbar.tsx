@@ -13,7 +13,7 @@ const Navbar = () => {
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
             <span className="text-xl font-bold text-primary-foreground">D</span>
           </div>
-          <span className="text-xl font-bold">DataLab Pro</span>
+          <span className="text-xl font-bold">Scan Pro</span>
         </Link>
         
         {/* Desktop menu */}
