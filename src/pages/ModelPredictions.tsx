@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, BarChart3, Download } from "lucide-react";
+import { ArrowLeft, BarChart3, Download, TrendingUp } from "lucide-react";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from "recharts";
 
 interface Prediction {
   id: number;
@@ -94,12 +95,84 @@ const ModelPredictions = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        {/* Charts Section */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Comparación de Predicciones
+              </CardTitle>
+              <CardDescription>Valores reales vs predicciones</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={predictions}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="id" label={{ value: 'Muestra', position: 'insideBottom', offset: -5 }} />
+                  <YAxis label={{ value: 'Valor', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="actualValue" stroke="hsl(var(--primary))" name="Real" strokeWidth={2} />
+                  <Line type="monotone" dataKey="predictedValue" stroke="hsl(var(--secondary))" name="Predicción" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Nivel de Confianza</CardTitle>
+              <CardDescription>Distribución de confianza por muestra</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={predictions}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="id" label={{ value: 'Muestra', position: 'insideBottom', offset: -5 }} />
+                  <YAxis label={{ value: 'Confianza (%)', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="confidence" fill="hsl(var(--accent))" name="Confianza" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Precisión del Modelo</CardTitle>
+              <CardDescription>Distribución de errores de predicción</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <ScatterChart>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="actualValue" 
+                    name="Valor Real" 
+                    label={{ value: 'Valor Real', position: 'insideBottom', offset: -5 }} 
+                  />
+                  <YAxis 
+                    dataKey="predictedValue" 
+                    name="Predicción" 
+                    label={{ value: 'Predicción', angle: -90, position: 'insideLeft' }} 
+                  />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                  <Scatter name="Predicciones" data={predictions} fill="hsl(var(--primary))" />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Table Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Predicciones del Modelo</CardTitle>
+            <CardTitle>Detalle de Predicciones</CardTitle>
             <CardDescription>
-              Resultados de predicción generados por el modelo entrenado
+              Resultados detallados de predicción generados por el modelo
             </CardDescription>
           </CardHeader>
           <CardContent>

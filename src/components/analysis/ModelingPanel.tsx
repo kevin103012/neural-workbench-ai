@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DatasetInfo } from "@/pages/Analysis";
@@ -14,12 +15,10 @@ interface ModelingPanelProps {
 }
 
 const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
+  const navigate = useNavigate();
   const [modelType, setModelType] = useState<string>("linear_regression");
-  const [targetColumn, setTargetColumn] = useState<string>(dataset.columns[0]);
   const [isTraining, setIsTraining] = useState(false);
   const [results, setResults] = useState<any>(null);
-  const [showPredictions, setShowPredictions] = useState(false);
-  const [predictions, setPredictions] = useState<any[]>([]);
   const { toast } = useToast();
 
   const models = [
@@ -87,16 +86,9 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
     });
   };
 
-  const generatePredictions = () => {
-    const simulatedPredictions = Array.from({ length: 10 }, (_, i) => ({
-      id: i + 1,
-      input: `Muestra ${i + 1}`,
-      actual: (Math.random() * 100).toFixed(2),
-      predicted: (Math.random() * 100).toFixed(2),
-      confidence: (85 + Math.random() * 15).toFixed(2),
-    }));
-    setPredictions(simulatedPredictions);
-    setShowPredictions(true);
+  const handleViewPredictions = () => {
+    if (!results?.id) return;
+    navigate(`/project/${results.id}`);
   };
 
   return (
@@ -107,41 +99,23 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
           Configuración del modelo
         </h3>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Tipo de modelo</label>
-            <Select value={modelType} onValueChange={setModelType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {models.map((model) => (
-                  <SelectItem key={model.value} value={model.value}>
-                    <div className="flex items-center gap-2">
-                      <span>{model.label}</span>
-                      <Badge variant="outline" className="text-xs">{model.type}</Badge>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Variable objetivo</label>
-            <Select value={targetColumn} onValueChange={setTargetColumn}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {dataset.columns.map((col) => (
-                  <SelectItem key={col} value={col}>
-                    {col}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="mb-6">
+          <label className="text-sm font-medium mb-2 block">Tipo de modelo</label>
+          <Select value={modelType} onValueChange={setModelType}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {models.map((model) => (
+                <SelectItem key={model.value} value={model.value}>
+                  <div className="flex items-center gap-2">
+                    <span>{model.label}</span>
+                    <Badge variant="outline" className="text-xs">{model.type}</Badge>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button 
@@ -236,7 +210,7 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
                 <Download className="mr-2 h-4 w-4" />
                 Descargar Modelo
               </Button>
-              <Button onClick={generatePredictions} variant="secondary" className="w-full">
+              <Button onClick={handleViewPredictions} variant="secondary" className="w-full">
                 <Eye className="mr-2 h-4 w-4" />
                 Visualizar Predicciones
               </Button>
@@ -248,43 +222,6 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
         </Card>
       )}
 
-      {showPredictions && predictions.length > 0 && (
-        <Card className="p-6 bg-card/50 backdrop-blur-sm">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Eye className="h-5 w-5 text-primary" />
-            Predicciones del Modelo (Simuladas)
-          </h3>
-          <div className="rounded-md border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">ID</TableHead>
-                  <TableHead>Entrada</TableHead>
-                  <TableHead>Valor Real</TableHead>
-                  <TableHead>Predicción</TableHead>
-                  <TableHead>Confianza</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {predictions.map((pred) => (
-                  <TableRow key={pred.id}>
-                    <TableCell className="font-medium">{pred.id}</TableCell>
-                    <TableCell>{pred.input}</TableCell>
-                    <TableCell>{pred.actual}</TableCell>
-                    <TableCell className="font-semibold text-primary">{pred.predicted}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{pred.confidence}%</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <p className="text-sm text-muted-foreground mt-4">
-            Estas predicciones son datos simulados para demostración. En producción, el modelo generará predicciones reales basadas en tus datos.
-          </p>
-        </Card>
-      )}
     </div>
   );
 };
