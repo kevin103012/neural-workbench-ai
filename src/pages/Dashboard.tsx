@@ -91,14 +91,14 @@ const Dashboard = () => {
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold mb-4">Mis Modelos</h2>
+          <h2 className="text-2xl font-bold mb-4">Mis Proyectos</h2>
           {models.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <BarChart3 className="h-16 w-16 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground text-center">
-                  Aún no tienes modelos guardados.<br />
-                  ¡Comienza creando tu primer modelo!
+                  Aún no tienes proyectos guardados.<br />
+                  ¡Comienza creando tu primer proyecto!
                 </p>
               </CardContent>
             </Card>

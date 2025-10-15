@@ -3,10 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DatasetInfo } from "@/pages/Analysis";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Play, CheckCircle, TrendingUp, Save, Download } from "lucide-react";
+import { Brain, Play, CheckCircle, TrendingUp, Save, Download, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface ModelingPanelProps {
   dataset: DatasetInfo;
@@ -17,6 +18,8 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
   const [targetColumn, setTargetColumn] = useState<string>(dataset.columns[0]);
   const [isTraining, setIsTraining] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [showPredictions, setShowPredictions] = useState(false);
+  const [predictions, setPredictions] = useState<any[]>([]);
   const { toast } = useToast();
 
   const models = [
@@ -82,6 +85,18 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
       title: "Modelo descargado",
       description: "El modelo ha sido descargado correctamente",
     });
+  };
+
+  const generatePredictions = () => {
+    const simulatedPredictions = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      input: `Muestra ${i + 1}`,
+      actual: (Math.random() * 100).toFixed(2),
+      predicted: (Math.random() * 100).toFixed(2),
+      confidence: (85 + Math.random() * 15).toFixed(2),
+    }));
+    setPredictions(simulatedPredictions);
+    setShowPredictions(true);
   };
 
   return (
@@ -212,20 +227,62 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
           </div>
 
           <div className="pt-6 border-t border-border space-y-4">
-            <div className="flex gap-3">
-              <Button onClick={handleSaveModel} className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Button onClick={handleSaveModel} className="w-full">
                 <Save className="mr-2 h-4 w-4" />
                 Guardar Modelo
               </Button>
-              <Button onClick={handleDownloadModel} variant="outline" className="flex-1">
+              <Button onClick={handleDownloadModel} variant="outline" className="w-full">
                 <Download className="mr-2 h-4 w-4" />
                 Descargar Modelo
+              </Button>
+              <Button onClick={generatePredictions} variant="secondary" className="w-full">
+                <Eye className="mr-2 h-4 w-4" />
+                Visualizar Predicciones
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
               <strong>Nota:</strong> Estos son resultados simulados. Conecta con el backend de FastAPI para entrenar modelos reales con Scikit-Learn y PyTorch.
             </p>
           </div>
+        </Card>
+      )}
+
+      {showPredictions && predictions.length > 0 && (
+        <Card className="p-6 bg-card/50 backdrop-blur-sm">
+          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Eye className="h-5 w-5 text-primary" />
+            Predicciones del Modelo (Simuladas)
+          </h3>
+          <div className="rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead>Entrada</TableHead>
+                  <TableHead>Valor Real</TableHead>
+                  <TableHead>Predicción</TableHead>
+                  <TableHead>Confianza</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {predictions.map((pred) => (
+                  <TableRow key={pred.id}>
+                    <TableCell className="font-medium">{pred.id}</TableCell>
+                    <TableCell>{pred.input}</TableCell>
+                    <TableCell>{pred.actual}</TableCell>
+                    <TableCell className="font-semibold text-primary">{pred.predicted}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{pred.confidence}%</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <p className="text-sm text-muted-foreground mt-4">
+            Estas predicciones son datos simulados para demostración. En producción, el modelo generará predicciones reales basadas en tus datos.
+          </p>
         </Card>
       )}
     </div>
