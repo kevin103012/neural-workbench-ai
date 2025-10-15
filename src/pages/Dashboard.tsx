@@ -105,7 +105,11 @@ const Dashboard = () => {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {models.map((model) => (
-                <Card key={model.id}>
+                <Card 
+                  key={model.id}
+                  className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]"
+                  onClick={() => navigate(`/project/${model.id}`)}
+                >
                   <CardHeader>
                     <CardTitle className="text-lg">{model.name}</CardTitle>
                     <CardDescription>
@@ -121,7 +125,7 @@ const Dashboard = () => {
                       <span className="text-sm text-muted-foreground">Precisión:</span>
                       <span className="font-semibold">{model.accuracy}%</span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="outline"
                         size="sm"
