@@ -15,32 +15,33 @@ interface Prediction {
   confidence: number;
 }
 
-interface SavedModel {
+interface Project {
   id: string;
   name: string;
-  type: string;
-  accuracy: number;
+  description: string;
+  datasetName: string;
+  models: any[];
   createdAt: string;
 }
 
 const ModelPredictions = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [model, setModel] = useState<SavedModel | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
 
   useEffect(() => {
-    const savedModels = JSON.parse(localStorage.getItem("savedModels") || "[]");
-    const currentModel = savedModels.find((m: SavedModel) => m.id === id);
+    const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+    const currentProject = savedProjects.find((p: Project) => p.id === id);
     
-    if (!currentModel) {
+    if (!currentProject) {
       navigate("/dashboard");
       return;
     }
 
-    setModel(currentModel);
+    setProject(currentProject);
 
-    // Generate simulated predictions
+    // Generate simulated predictions based on all models in the project
     const mockPredictions: Prediction[] = Array.from({ length: 15 }, (_, i) => {
       const actual = Math.floor(Math.random() * 100);
       const variance = Math.floor(Math.random() * 10) - 5;
@@ -57,17 +58,17 @@ const ModelPredictions = () => {
   }, [id, navigate]);
 
   const handleDownloadPredictions = () => {
-    const dataStr = JSON.stringify({ model, predictions }, null, 2);
+    const dataStr = JSON.stringify({ project, predictions }, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `predicciones_${model?.name.replace(/\s+/g, "_")}.json`;
+    link.download = `predicciones_${project?.name.replace(/\s+/g, "_")}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
-  if (!model) return null;
+  if (!project) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
@@ -81,9 +82,9 @@ const ModelPredictions = () => {
             <div className="flex items-center gap-3">
               <BarChart3 className="h-8 w-8 text-primary" />
               <div>
-                <h1 className="text-2xl font-bold">{model.name}</h1>
+                <h1 className="text-2xl font-bold">{project.name}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {model.type} - Precisión: {model.accuracy}%
+                  {project.description || "Sin descripción"} • {project.models.length} modelo(s)
                 </p>
               </div>
             </div>

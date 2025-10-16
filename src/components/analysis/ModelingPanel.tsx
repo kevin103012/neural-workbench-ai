@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DatasetInfo } from "@/pages/Analysis";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Play, CheckCircle, TrendingUp, Save, Download, Eye } from "lucide-react";
+import { Brain, Play, CheckCircle, TrendingUp, Download, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
@@ -12,9 +12,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 interface ModelingPanelProps {
   dataset: DatasetInfo;
+  projectId?: string;
 }
 
-const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
+const ModelingPanel = ({ dataset, projectId }: ModelingPanelProps) => {
   const navigate = useNavigate();
   const [modelType, setModelType] = useState<string>("linear_regression");
   const [isTraining, setIsTraining] = useState(false);
@@ -52,20 +53,23 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
 
       setResults(simulatedResults);
       setIsTraining(false);
+
+      // Guardar automáticamente el modelo en el proyecto
+      if (projectId) {
+        const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+        const projectIndex = savedProjects.findIndex((p: any) => p.id === projectId);
+        
+        if (projectIndex !== -1) {
+          savedProjects[projectIndex].models.push(simulatedResults);
+          localStorage.setItem("projects", JSON.stringify(savedProjects));
+          
+          toast({
+            title: "Modelo guardado automáticamente",
+            description: "El modelo ha sido añadido a tu proyecto",
+          });
+        }
+      }
     }, 3000);
-  };
-
-  const handleSaveModel = () => {
-    if (!results) return;
-
-    const savedModels = JSON.parse(localStorage.getItem("savedModels") || "[]");
-    savedModels.push(results);
-    localStorage.setItem("savedModels", JSON.stringify(savedModels));
-
-    toast({
-      title: "Modelo guardado",
-      description: "El modelo ha sido guardado en tu dashboard",
-    });
   };
 
   const handleDownloadModel = () => {
@@ -87,8 +91,8 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
   };
 
   const handleViewPredictions = () => {
-    if (!results?.id) return;
-    navigate(`/project/${results.id}`);
+    if (!projectId) return;
+    navigate(`/project/${projectId}`);
   };
 
   return (
@@ -201,11 +205,7 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
           </div>
 
           <div className="pt-6 border-t border-border space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Button onClick={handleSaveModel} className="w-full">
-                <Save className="mr-2 h-4 w-4" />
-                Guardar Modelo
-              </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <Button onClick={handleDownloadModel} variant="outline" className="w-full">
                 <Download className="mr-2 h-4 w-4" />
                 Descargar Modelo
@@ -216,7 +216,7 @@ const ModelingPanel = ({ dataset }: ModelingPanelProps) => {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              <strong>Nota:</strong> Estos son resultados simulados. Conecta con el backend de FastAPI para entrenar modelos reales con Scikit-Learn y PyTorch.
+              <strong>Nota:</strong> El modelo se guarda automáticamente en tu proyecto. Puedes verlo en el dashboard.
             </p>
           </div>
         </Card>

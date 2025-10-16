@@ -10,6 +10,7 @@ const DataCleaning = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dataset = location.state?.dataset as DatasetInfo | null;
+  const projectId = location.state?.projectId as string | undefined;
   const projectName = location.state?.projectName as string | undefined;
   const projectDescription = location.state?.projectDescription as string | undefined;
 
@@ -27,6 +28,7 @@ const DataCleaning = () => {
     navigate("/analysis", { 
       state: { 
         dataset,
+        projectId,
         projectName,
         projectDescription
       } 

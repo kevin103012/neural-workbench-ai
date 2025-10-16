@@ -12,11 +12,21 @@ import { Label } from "@/components/ui/label";
 import FileUpload from "@/components/analysis/FileUpload";
 import { DatasetInfo } from "@/pages/Analysis";
 
-interface SavedModel {
+interface Model {
   id: string;
   name: string;
   type: string;
   accuracy: number;
+  createdAt: string;
+  framework?: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  datasetName: string;
+  models: Model[];
   createdAt: string;
 }
 
@@ -24,7 +34,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
-  const [models, setModels] = useState<SavedModel[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -37,8 +47,8 @@ const Dashboard = () => {
     }
     setUser(JSON.parse(currentUser));
 
-    const savedModels = JSON.parse(localStorage.getItem("savedModels") || "[]");
-    setModels(savedModels);
+    const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+    setProjects(savedProjects);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -50,34 +60,49 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  const handleDeleteModel = (modelId: string) => {
-    const updatedModels = models.filter(m => m.id !== modelId);
-    setModels(updatedModels);
-    localStorage.setItem("savedModels", JSON.stringify(updatedModels));
+  const handleDeleteProject = (projectId: string) => {
+    const updatedProjects = projects.filter(p => p.id !== projectId);
+    setProjects(updatedProjects);
+    localStorage.setItem("projects", JSON.stringify(updatedProjects));
     toast({
-      title: "Modelo eliminado",
-      description: "El modelo ha sido eliminado correctamente",
+      title: "Proyecto eliminado",
+      description: "El proyecto ha sido eliminado correctamente",
     });
   };
 
-  const handleDownloadModel = (model: SavedModel) => {
-    const dataStr = JSON.stringify(model, null, 2);
+  const handleDownloadProject = (project: Project) => {
+    const dataStr = JSON.stringify(project, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${model.name.replace(/\s+/g, "_")}.json`;
+    link.download = `${project.name.replace(/\s+/g, "_")}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   const handleDatasetLoaded = (dataset: DatasetInfo) => {
+    const newProject: Project = {
+      id: Date.now().toString(),
+      name: projectName || "Proyecto sin nombre",
+      description: projectDescription || "",
+      datasetName: dataset.name,
+      models: [],
+      createdAt: new Date().toISOString(),
+    };
+
+    const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+    savedProjects.push(newProject);
+    localStorage.setItem("projects", JSON.stringify(savedProjects));
+    localStorage.setItem("currentProject", JSON.stringify(newProject));
+
     setIsNewProjectOpen(false);
     navigate("/cleaning", { 
       state: { 
         dataset,
-        projectName,
-        projectDescription
+        projectId: newProject.id,
+        projectName: newProject.name,
+        projectDescription: newProject.description
       } 
     });
     setProjectName("");
@@ -114,7 +139,7 @@ const Dashboard = () => {
 
         <div>
           <h2 className="text-2xl font-bold mb-4">Mis Proyectos</h2>
-          {models.length === 0 ? (
+          {projects.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <BarChart3 className="h-16 w-16 text-muted-foreground mb-4" />
@@ -126,33 +151,37 @@ const Dashboard = () => {
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {models.map((model) => (
+              {projects.map((project) => (
                 <Card 
-                  key={model.id}
+                  key={project.id}
                   className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]"
-                  onClick={() => navigate(`/project/${model.id}`)}
+                  onClick={() => navigate(`/project/${project.id}`)}
                 >
                   <CardHeader>
-                    <CardTitle className="text-lg">{model.name}</CardTitle>
+                    <CardTitle className="text-lg">{project.name}</CardTitle>
                     <CardDescription>
-                      Creado: {new Date(model.createdAt).toLocaleDateString()}
+                      {project.description || "Sin descripción"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Tipo:</span>
-                      <Badge variant="secondary">{model.type}</Badge>
+                      <span className="text-sm text-muted-foreground">Dataset:</span>
+                      <Badge variant="secondary">{project.datasetName}</Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Precisión:</span>
-                      <span className="font-semibold">{model.accuracy}%</span>
+                      <span className="text-sm text-muted-foreground">Modelos:</span>
+                      <span className="font-semibold">{project.models.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Creado:</span>
+                      <span className="text-sm">{new Date(project.createdAt).toLocaleDateString()}</span>
                     </div>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => handleDownloadModel(model)}
+                        onClick={() => handleDownloadProject(project)}
                       >
                         <Download className="h-4 w-4 mr-1" />
                         Descargar
@@ -160,7 +189,7 @@ const Dashboard = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDeleteModel(model.id)}
+                        onClick={() => handleDeleteProject(project.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

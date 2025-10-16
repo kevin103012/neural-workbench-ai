@@ -19,6 +19,7 @@ const Analysis = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [dataset, setDataset] = useState<DatasetInfo | null>(location.state?.dataset || null);
+  const projectId = location.state?.projectId as string | undefined;
   const projectName = location.state?.projectName as string | undefined;
   const projectDescription = location.state?.projectDescription as string | undefined;
 
@@ -75,7 +76,7 @@ const Analysis = () => {
                 </TabsContent>
                 
                 <TabsContent value="modeling" className="mt-6">
-                  <ModelingPanel dataset={dataset} />
+                  <ModelingPanel dataset={dataset} projectId={projectId} />
                 </TabsContent>
               </Tabs>
             </div>
