@@ -19,12 +19,16 @@ const Analysis = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [dataset, setDataset] = useState<DatasetInfo | null>(location.state?.dataset || null);
+  const projectName = location.state?.projectName as string | undefined;
+  const projectDescription = location.state?.projectDescription as string | undefined;
 
   useEffect(() => {
     if (location.state?.dataset) {
       setDataset(location.state.dataset);
+    } else if (!dataset) {
+      navigate("/dashboard");
     }
-  }, [location.state]);
+  }, [location.state, dataset, navigate]);
 
   const handleDatasetLoaded = (newDataset: DatasetInfo) => {
     navigate("/cleaning", { state: { dataset: newDataset } });
@@ -39,8 +43,18 @@ const Analysis = () => {
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               Análisis de Datos
             </h1>
+            {projectName && (
+              <p className="text-lg font-semibold mb-1">
+                {projectName}
+              </p>
+            )}
+            {projectDescription && (
+              <p className="text-sm text-muted-foreground mb-2">
+                {projectDescription}
+              </p>
+            )}
             <p className="text-muted-foreground">
-              Importa tu dataset y obtén análisis estadísticos, visualizaciones y predicciones
+              Obtén análisis estadísticos, visualizaciones y predicciones
             </p>
           </div>
 

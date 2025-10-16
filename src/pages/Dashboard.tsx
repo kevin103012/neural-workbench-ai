@@ -73,7 +73,7 @@ const Dashboard = () => {
 
   const handleDatasetLoaded = (dataset: DatasetInfo) => {
     setIsNewProjectOpen(false);
-    navigate("/analysis", { 
+    navigate("/cleaning", { 
       state: { 
         dataset,
         projectName,

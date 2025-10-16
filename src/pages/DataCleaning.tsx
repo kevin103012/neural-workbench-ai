@@ -10,10 +10,12 @@ const DataCleaning = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dataset = location.state?.dataset as DatasetInfo | null;
+  const projectName = location.state?.projectName as string | undefined;
+  const projectDescription = location.state?.projectDescription as string | undefined;
 
   useEffect(() => {
     if (!dataset) {
-      navigate("/analysis");
+      navigate("/dashboard");
     }
   }, [dataset, navigate]);
 
@@ -22,7 +24,13 @@ const DataCleaning = () => {
   }
 
   const handleContinueToAnalysis = () => {
-    navigate("/analysis", { state: { dataset } });
+    navigate("/analysis", { 
+      state: { 
+        dataset,
+        projectName,
+        projectDescription
+      } 
+    });
   };
 
   return (
@@ -35,16 +43,26 @@ const DataCleaning = () => {
               <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                 Limpieza de Datos
               </h1>
+              {projectName && (
+                <p className="text-lg font-semibold mb-1">
+                  {projectName}
+                </p>
+              )}
+              {projectDescription && (
+                <p className="text-sm text-muted-foreground mb-2">
+                  {projectDescription}
+                </p>
+              )}
               <p className="text-muted-foreground">
                 Dataset: <span className="font-semibold">{dataset.name}</span> • {dataset.rows} filas • {dataset.columns.length} columnas
               </p>
             </div>
             <Button
               variant="outline"
-              onClick={() => navigate("/analysis")}
+              onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver a cargar otro
+              Volver al Dashboard
             </Button>
           </div>
 
