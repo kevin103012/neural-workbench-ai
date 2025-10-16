@@ -5,6 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, LogOut, Plus, Download, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import FileUpload from "@/components/analysis/FileUpload";
+import { DatasetInfo } from "@/pages/Analysis";
 
 interface SavedModel {
   id: string;
@@ -19,6 +25,9 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [models, setModels] = useState<SavedModel[]>([]);
+  const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -62,6 +71,19 @@ const Dashboard = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleDatasetLoaded = (dataset: DatasetInfo) => {
+    setIsNewProjectOpen(false);
+    navigate("/analysis", { 
+      state: { 
+        dataset,
+        projectName,
+        projectDescription
+      } 
+    });
+    setProjectName("");
+    setProjectDescription("");
+  };
+
   if (!user) return null;
 
   return (
@@ -84,9 +106,9 @@ const Dashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <Button onClick={() => navigate("/analysis")} size="lg" className="w-full sm:w-auto">
+          <Button onClick={() => setIsNewProjectOpen(true)} size="lg" className="w-full sm:w-auto">
             <Plus className="mr-2 h-5 w-5" />
-            Comenzar Análisis de Datos
+            Crear un nuevo proyecto
           </Button>
         </div>
 
@@ -150,6 +172,44 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      <Dialog open={isNewProjectOpen} onOpenChange={setIsNewProjectOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Crear nuevo proyecto</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <Card className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="projectName">Nombre del proyecto</Label>
+                  <Input
+                    id="projectName"
+                    placeholder="Ej: Análisis de ventas 2024"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="projectDescription">Descripción</Label>
+                  <Textarea
+                    id="projectDescription"
+                    placeholder="Describe brevemente tu proyecto..."
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
+                    className="mt-1.5"
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <FileUpload onDatasetLoaded={handleDatasetLoaded} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
